@@ -1,0 +1,70 @@
+모델 version1
+scaling 작업 없음
+운동: 총 4개의 운동
+['standing_knee_up', 'side_lunge', 'lying_leg_raise', 'standing_side_crunch']
+좌표정보, visibility, 중심점, 각도를 데이터셋에 넣었음
+500 epoch
+모델을 직접 써보진 않았음
+
+모델 version2
+좌표 + visibility -> 한번에 scaling
+angle -> scaling
+concatenate(scaled_(좌표+visibility).flatten, scaled_angle)
+300 epoch
+운동 순서: 총 5개의 운동
+actions = ['crunch', 'lying_leg_raise',
+           'side_lunge', 'standing_knee_up',
+           'standing_side_crunch']
+모델 개망함
+아마 좌표와 visibility 를 한번에 스케일링해서 그런거 같음
+
+모델 version3
+좌표, visibility, 각도 각각 따로 스케일러 사용하여 concatenate
+학습
+에포크 100
+운동 순서: 총 5개의 운동
+actions = ['crunch', 'lying_leg_raise', 'side_lunge', 'standing_knee_up', 'standing_side_crunch']
+실제 운동영상을 가지고 확인해 본 결과 학습이 뭔가 이상하게 된듯
+발생 문제 원인: 코드를 보니 4개의 데이터셋만 사용해서 5개의 운동을 분할하고 있었음
+
+모델 version4
+스케일러 사용하지 않음
+좌표 + 각도 정보만 데이터셋에 담았음
+100 epoch로 진행하였음
+운동 순서: 총 5개의 운동
+actions = ['crunch', 'lying_leg_raise', 'side_lunge', 'standing_knee_up', 'standing_side_crunch']
+발생 문제: 이전 모델보다는 운동을 구분하는 능력이 생겼지만 크런치와 스탠딩 사이드 크런치를 헷갈려함.
+
+모델 version5
+좌표, visibility, 각도 각각 따로 스케일러 사용하여 concatenate
+운동: 총 5개의 운동
+actions = ['crunch', 'lying_leg_raise', 'side_lunge', 'standing_knee_up', 'standing_side_crunch']
+100 epoch 사용
+실제 영상에서 사용하니 전혀 구분하고 있지 않음 스케일러에서 뭔가 문제가 있는듯, 스케일러 코드를 다시 짜봐야 할듯
+
+모델 version6
+모델5와 코드는 같지만 사이드 런지를 없앤 데이터셋
+총 4개의 운동이 들어 있음
+추가적으로 모델에서 활성화 함수를 default(tanh)값으로 둠
+각도만 Robust scaler 사용
+
+모델 version7
+좌표 -> robust scaler
+visibility -> MinMax scaler를 사용했으나 결과가 좋지 않아 스케일러를 뺀상태로 해봄
+각도 -> normalizer
+
+5개의 운동
+50epoch
+
+모델 version8
+좌표 -> 스케일러 사용하지 않음
+visibility -> 제거
+각도 -> normalizer
+운동 5가지, 50epochs
+
+version9 
+운동별 모델 각각 하나씩 
+좌표 -> 스케일러 사용하지 않음
+visibility -> 제거
+각도 -> normalizer
+라벨링: 운동모델-0, 나머지 운동-1

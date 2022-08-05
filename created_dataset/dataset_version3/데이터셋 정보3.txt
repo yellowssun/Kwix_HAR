@@ -1,0 +1,13 @@
+좌표 -> scaling
+visibility -> scaling
+angle -> scaling
+
+concatenate(scaled_(좌표+visibility).flatten, scaled_angle
+
+학습
+에포크 100
+
+운동 순서:
+actions = ['crunch', 'lying_leg_raise', 'side_lunge', 'standing_knee_up', 'standing_side_crunch']
+
+실제 운동영상을 가지고 확인해 본 결과 학습이 뭔가 이상하게 된듯

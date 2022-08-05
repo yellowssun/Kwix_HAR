@@ -1,0 +1,7 @@
+scaling 작업 없음
+
+운동: 총 4개의 운동
+['standing_knee_up', 'side_lunge', 'lying_leg_raise', 'standing_side_crunch']
+
+좌표정보, visibility, 중심점, 각도를 데이터셋에 넣었음
+500 epoch
