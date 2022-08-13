@@ -3,14 +3,19 @@ import os, time
 import pandas as pd
 import itertools
 import matplotlib.pyplot as plt
+import tensorflow as tf
 import tensorflowjs as tfjs
-from keras.utils import plot_model
+# from keras.utils import plot_model
 from sklearn.metrics import confusion_matrix
 from keras.metrics import AUC, Precision, Recall
 from keras.models import Sequential, load_model
-from keras.layers import LSTM, Dense, Bidirectional
+from keras.layers import LSTM, Dense, Bidirectional, Attention
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
+# from keras_self_attention import SeqSelfAttention
 from operation import load_data, load_test_data, seperate_label, plot_confusion_matrix
+
+
+print(tf.__version__)
 
 
 figure_num = 1
@@ -28,15 +33,15 @@ side_lunge = ['side_lunge_F', 'side_lunge_T']
 squat = ['squat_F', 'squat_T']
 
 
-actions = [side_lunge]
-_actions = ['side_lunge']
+actions = [side_crunch, side_lunge]
+_actions = ['side_crunch', 'side_lunge']
 loss = 'binary_crossentropy'
 
 
-os.makedirs('C:/Users/UCL7/VS_kwix/new_model/v4', exist_ok=True)
-os.makedirs('C:/Users/UCL7/VS_kwix/evaluation_v4', exist_ok=True)
-os.makedirs('C:/Users/UCL7/VS_kwix/evaluation_v4/confusion_matrix', exist_ok=True)
-os.makedirs('C:/Users/UCL7/VS_kwix/evaluation_v4/loss', exist_ok=True)
+os.makedirs('C:/Users/UCL7/VS_kwix/new_model/v5', exist_ok=True)
+os.makedirs('C:/Users/UCL7/VS_kwix/evaluation_v5', exist_ok=True)
+os.makedirs('C:/Users/UCL7/VS_kwix/evaluation_v5/confusion_matrix', exist_ok=True)
+os.makedirs('C:/Users/UCL7/VS_kwix/evaluation_v5/loss', exist_ok=True)
 
 
 for idx, action in enumerate(actions):
@@ -51,16 +56,15 @@ for idx, action in enumerate(actions):
     test_data = load_test_data(path_dir2, folder_list2)
 
     x_data, y_data = seperate_label(data)
-    print(x_data.shape)
+    print(f'{_actions[idx]} train shape:', x_data.shape)
     test_xdata, test_ydata = seperate_label(test_data)
-
+    print(f'{_actions[idx]} test shape:', test_xdata.shape)
 
     model = Sequential([
-        Bidirectional(LSTM(64, return_sequences=True, batch_size=32,
-                    input_shape=x_data.shape[1:3])),
+        Bidirectional(LSTM(64, return_sequences=True, input_shape=x_data.shape[1:3])),
         Bidirectional(LSTM(128, return_sequences=True)),
         LSTM(64),
-        Dense(32, activation='relu'),
+        LSTM(32, activation='relu'),
         Dense(16, activation='relu'),
         Dense(2, activation='softmax')
     ])
@@ -85,7 +89,7 @@ for idx, action in enumerate(actions):
         ]
     )
 
-    plot_model(model, show_shapes=True)
+    # plot_model(model, show_shapes=True)
     model = load_model(model_path)
 
 
@@ -114,7 +118,7 @@ for idx, action in enumerate(actions):
     plt.ylabel("Train Error")
     plt.tight_layout()
     plt.legend(['train_loss', 'val_loss', 'train_acc', 'val_acc'])
-    plt.savefig(f"C:/Users/UCL7/VS_kwix/evaluation_v4/loss/{loss}_{created_time}_{_actions[idx]}_train_error_v5.png")
+    plt.savefig(f"C:/Users/UCL7/VS_kwix/evaluation_v5/loss/{loss}_{created_time}_{_actions[idx]}_train_error_v4.png")
 
 
     # plt.figure()
@@ -143,4 +147,4 @@ for idx, action in enumerate(actions):
     cm = confusion_matrix(y_true=rounded_labels, y_pred=rounded_predictions)
     cm_plot_labels = ['bad', 'good']
     plot_confusion_matrix(cm=cm, classes=cm_plot_labels, title='Confusion matrix')
-    plt.savefig(f'C:/Users/UCL7/VS_kwix/evaluation_v4/confusion_matrix/{_actions[idx]}_v5.png')
+    plt.savefig(f'C:/Users/UCL7/VS_kwix/evaluation_v5/confusion_matrix/{_actions[idx]}_v4.png')
