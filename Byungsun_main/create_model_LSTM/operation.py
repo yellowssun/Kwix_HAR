@@ -4,10 +4,7 @@ import itertools
 from keras.utils import to_categorical
 
 
-def get_points_angle_13(landmark_subset):
-    """
-    13개의 Landmarks, 8개의 각도
-    """
+def get_points_angle(landmark_subset):
     joint = np.zeros((13, 3))
     for j, lm in enumerate(landmark_subset.landmark):
         joint[j] = [lm.x, lm.y, lm.z]
@@ -20,26 +17,6 @@ def get_points_angle_13(landmark_subset):
     angle = np.arccos(np.einsum('nt, nt->n',
                                 v[[0, 1, 2, 3, 5, 6, 7, 8], :],
                                 v[[1, 2, 3, 4, 6, 7, 8, 9], :]))
-    angle = np.degrees(angle)
-    return joint, angle
-
-
-def get_points_angle_17(landmark_subset):
-    """
-    17개의 Landmarks, 10개의 각도
-    """
-    joint = np.zeros((17, 3))
-    for j, lm in enumerate(landmark_subset.landmark):
-        joint[j] = [lm.x, lm.y, lm.z]
-
-    v1 = joint[[4, 2, 2, 8, 10, 12, 3, 1, 1, 7, 9, 11], :3]
-    v2 = joint[[6, 4, 8, 10, 12, 16, 5, 3, 7, 9, 11, 15], :3]
-    v = v2 - v1
-    v = v / np.linalg.norm(v, axis=1)[:, np.newaxis]
-
-    angle = np.arccos(np.einsum('nt, nt->n',
-                                v[[0, 1, 2, 3, 4, 6, 7, 8, 9, 10], :],
-                                v[[1, 2, 3, 4, 5, 7, 8, 9, 10, 11], :]))
     angle = np.degrees(angle)
     return joint, angle
 

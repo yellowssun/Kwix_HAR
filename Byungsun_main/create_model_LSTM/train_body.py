@@ -10,7 +10,7 @@ from keras.models import Sequential, load_model
 from keras.layers import LSTM, Dense, Bidirectional
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
 from keras.utils import plot_model
-from operation import load_data, load_test_data, seperate_label
+from operation import load_data, load_test_data, seperate_label, 
 
 
 figure_num = 1
@@ -24,8 +24,8 @@ actions = ['babel_curl', 'deadlift', 'knee_up', 'leg_raise', 'over_head_press', 
 os.makedirs('C:/Users/UCL7/VS_kwix/new_model/v2', exist_ok=True)
 
 for idx, _ in enumerate(actions):
-    path_dir1 = 'C:/Users/UCL7/VS_kwix/train_dataset_v4/' + actions[idx]
-    path_dir2 = 'C:/Users/UCL7/VS_kwix/test_dataset_v4/' + actions[idx]
+    path_dir1 = 'C:/Users/UCL7/VS_kwix/train_dataset_v2/' + actions[idx]
+    path_dir2 = 'C:/Users/UCL7/VS_kwix/test_dataset_v2/' + actions[idx]
     folder_list1 = os.listdir(path_dir1)
     folder_list2 = os.listdir(path_dir2)
 
@@ -55,7 +55,7 @@ for idx, _ in enumerate(actions):
                 metrics=['accuracy', AUC(), Precision(), Recall()])
     print(model.summary)
 
-    model_path = 'C:/Users/UCL7/VS_kwix/new_model/v4/' + actions[idx] + '_model_v3.2_.h5'
+    model_path = 'C:/Users/UCL7/VS_kwix/new_model/v3/' + actions[idx] + '_model_v3.2_.h5'
 
     history = model.fit(
         x_data,
