@@ -51,6 +51,14 @@ def seperate_label(data):
     y_data = y_data.astype(np.float32)
     return x_data, y_data
 
+
+def seperate_angle(data):
+    landmark_data = data[:, :, :51].astype(np.float32)
+    angle_data = data[:, :, 51:].astype(np.float32)
+    print(f'Landmark data shape: {landmark_data.shape}')
+    print(f'Angle data shape: {angle_data.shape}')
+    return landmark_data, angle_data
+
     
 def input_data(seq, seq_length, model, actions):
     input_data = np.expand_dims(
