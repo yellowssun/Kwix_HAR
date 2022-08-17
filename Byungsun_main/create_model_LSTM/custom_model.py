@@ -1,7 +1,8 @@
 import keras
 from keras.models import Sequential, Model
-from keras.layers import Conv1D, BatchNormalization, ReLU, GlobalAveragePooling1D, Dense, Bidirectional, LSTM, Dropout, Flatten, Input, Concatenate
-
+from keras.layers import Conv1D, Conv2D, BatchNormalization, GlobalAveragePooling1D
+from keras.layers import Bidirectional, LSTM, Dense
+from keras.layers import ReLU, Dropout, Input, Concatenate, Flatten
 
 def two_input_BiLS():
     input_landmark = Input(shape=(15, 51), name='landmark_input')
@@ -9,12 +10,12 @@ def two_input_BiLS():
 
     x = Bidirectional(LSTM(64, return_sequences=True, dropout=0.3, name='bidirectional_L1'))(input_landmark)
     x = Bidirectional(LSTM(128, return_sequences=True, name='bidirectional_L2'))(x)
-    x = LSTM(64, name='LSTM_L3')(x)
+    x = Flatten(x)
     # x = Model(inputs=input_landmark, outputs=x)
 
     y = Bidirectional(LSTM(64, return_sequences=True, dropout=0.3, name='bidirectional_A1'))(input_angle)
     y = Bidirectional(LSTM(128, return_sequences=True, name='bidirectional_A2'))(y)
-    y = LSTM(64, name='LSTM_A3')(y)
+    y = Flatten(y)
     # y = Model(inputs=input_landmark, outputs=y)    
 
     concatenate = Concatenate()([x, y])
@@ -31,23 +32,23 @@ def two_input_CNN():
     input_landmark = Input(shape=(15, 51), name='landmark_input')
     input_angle = Input(shape=(15, 10), name='angle_input')
 
-    x = Conv1D(filters=64, kernel_size=4, padding='same')(input_landmark)
+    x = Conv2D(filters=64, kernel_size=(3, 2), stride=(3, 1), padding='valid')(input_landmark)
     x = BatchNormalization()(x)
     x = ReLU()(x)
-    x = Conv1D(filters=64, kernel_size=4, padding='same')(input_landmark)
+    x = Conv1D(filters=64, kernel_size=4, padding='valid')(x)
     x = BatchNormalization()(x)
     x = ReLU()(x)
-    x = Conv1D(filters=64, kernel_size=4, padding='same')(input_landmark)
+    x = Conv1D(filters=64, kernel_size=4, padding='valid')(x)
     x = BatchNormalization()(x)
     x = ReLU()(x)
 
-    y = Conv1D(filters=64, kernel_size=4, padding='same')(input_angle)
+    y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
     y = BatchNormalization()(y)
     y = ReLU()(y)
-    y = Conv1D(filters=64, kernel_size=4, padding='same')(input_angle)
+    y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
     y = BatchNormalization()(y)
     y = ReLU()(y)
-    y = Conv1D(filters=64, kernel_size=4, padding='same')(input_angle)
+    y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
     y = BatchNormalization()(y)
     y = ReLU()(y)
 

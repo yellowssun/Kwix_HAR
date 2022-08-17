@@ -1,161 +1,147 @@
 import numpy as np
 import os, time
 import pandas as pd
-import itertools
 import matplotlib.pyplot as plt
 import tensorflowjs as tfjs
+from keras.models import load_model
 from sklearn.metrics import confusion_matrix
 from keras.metrics import AUC, Precision, Recall
-from keras.models import Sequential, load_model
-from keras.layers import LSTM, Dense, Bidirectional
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
-from keras.utils import plot_model
-from operation import load_data, load_test_data, seperate_label
+from operation import load_data, load_test_data, seperate_label, plot_confusion_matrix, seperate_angle
+from custom_model import CNN, BiLS, BiLS_CNN, CNN_BiLS, LS
+# import wandb
+from sklearn.model_selection import train_test_split
 
 
-figure_num = 1
+# wandb.init(project="17_model")
 created_time = int(time.time())
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = '1'
 
-actions = ['babel_curl', 'deadlift', 'knee_up', 'leg_raise', 'over_head_press', 'side_crunch', 'side_lunge', 'squart']
+_actions = ['side_raise', 'side_crunch', 'side_lunge', 'babel_curl', 'deadlift', 'knee_up', 'leg_raise', 'over_head_press', 'squat']
+# _actions = ['side_raise', 'side_crunch', 'side_lunge']
 
+loss = 'binary_crossentropy'
 
-os.makedirs('C:/Users/UCL7/VS_kwix/new_model/v2', exist_ok=True)
+# model_name1 = 'BiLS_CNN'
+model_name3 = 'LS'
+model_name2 = 'BiLS'
+# model_name4 = 'two_input_model'
+model_name = [ model_name2, model_name3]
 
-for idx, _ in enumerate(actions):
-    path_dir1 = 'C:/Users/UCL7/VS_kwix/train_dataset_v4/' + actions[idx]
-    path_dir2 = 'C:/Users/UCL7/VS_kwix/test_dataset_v4/' + actions[idx]
-    folder_list1 = os.listdir(path_dir1)
-    folder_list2 = os.listdir(path_dir2)
+# model1 = BiLS_CNN()
+model3 = LS()
+model2 = BiLS()
+# model4 = two_input_model()
+model_v = [model2, model3]
 
+os.makedirs('C:/Users/dimli/Desktop/Kwix_HAR/new_model/v6.3', exist_ok=True)
+os.makedirs('C:/Users/dimli/Desktop/Kwix_HAR/evaluation_v6.3', exist_ok=True)
+os.makedirs('C:/Users/dimli/Desktop/Kwix_HAR/evaluation_v6.3/confusion_matrix', exist_ok=True)
+os.makedirs('C:/Users/dimli/Desktop/Kwix_HAR/evaluation_v6.3/loss', exist_ok=True)
+os.makedirs('C:/Users/dimli/Desktop/Kwix_HAR/js_model/v6.3', exist_ok=True)
+for index, name in enumerate(model_name):
+    model_v[index].summary()
+    for idx, _ in enumerate(_actions):
+        print('action:', _actions[idx])
+        path_dir1 = 'C:/Users/dimli/Desktop/Kwix_HAR/train_dataset_v7/' + _actions[idx]
+        folder_list1 = os.listdir(path_dir1)
+        data = load_data(path_dir1, folder_list1)
 
-    data = load_data(path_dir1, folder_list1)
-    test_data = load_test_data(path_dir2, folder_list2)
-    print(data.shape)
-    print(test_data.shape)
+        train_data, test_data = train_test_split(data, test_size=0.1, train_size=0.9, random_state=2022)
 
-    x_data, y_data = seperate_label(data)
-    test_xdata, test_ydata = seperate_label(test_data)
+        x_data, y_data = seperate_label(train_data)
+        test_xdata, test_ydata = seperate_label(test_data)
 
-
-    model = Sequential([
-        Bidirectional(LSTM(64, return_sequences=True,
-                    input_shape=x_data.shape[1:3], dropout=0.2)),
-        LSTM(128, return_sequences=True, dropout=0.2),
-        LSTM(64, dropout=0.2),
-        Dense(32, activation='relu'),
-        Dense(16, activation='relu'),
-        Dense(2, activation='softmax')
-    ])
-
-    earlystopping = EarlyStopping(monitor='val_loss', patience=10, min_delta=0.0005)
-
-    model.compile(optimizer='adam', loss='categorical_crossentropy',
-                metrics=['accuracy', AUC(), Precision(), Recall()])
-    print(model.summary)
-
-    model_path = 'C:/Users/UCL7/VS_kwix/new_model/v4/' + actions[idx] + '_model_v3.2_.h5'
-
-    history = model.fit(
-        x_data,
-        y_data,
-        validation_split=0.2,
-        epochs=50,
-        callbacks=[
-            ModelCheckpoint(model_path,
-                            monitor='val_accuracy', verbose=1, save_best_only=True, mode='auto'),
-            ReduceLROnPlateau(monitor='val_accuracy', factor=0.2,
-                            patience=10, verbose=1, mode='auto')
-        ]
-    )
-
-    plot_model(model, show_shapes=True)
-
-    model = load_model(model_path)
-    tfjs.converters.save_keras_model(model, 'C:/Users/UCL7/VS_kwix/js_model' + '/' + actions[idx] + '_model_tfjs')
-
-
-# evaluation score
-    test_result = model.predict(test_xdata)
-    test_result = np.argmax(test_result, axis=1)
-    test_y= np.argmax(test_ydata, axis=1)
-    from sklearn.metrics import accuracy_score, precision_score, recall_score
-
-    acc = accuracy_score(test_y, test_result)
-    precision = precision_score(test_y, test_result)
-    recall = recall_score(test_y, test_result)
-    print(f'Accuracy: {acc}, Precision: {precision}, Recall: {recall}')
-
-
-# plot loss and validation loss 
-    pd.Series(history.history['loss']).plot(logy=True)
-    pd.Series(history.history['val_loss']).plot(logy=True)
-    plt.figure(figure_num)
-    figure_num += 1
-    plt.xlabel("Epoch")
-    plt.ylabel("Train Error")
-    plt.tight_layout()
-    plt.legend(['loss', 'val_loss'])
-    plt.savefig(f'C:/Users/UCL7/VS_kwix/train_error_{actions[idx]}_v3.2.png')
-
-
-# plot confusion matrix
-    def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
-
-        plt.imshow(cm, interpolation='nearest', cmap=cmap)
-        plt.title(title)
-        plt.colorbar()
-        tick_marks = np.arange(len(classes))
-        plt.xticks(tick_marks, classes, rotation=45)
-        plt.yticks(tick_marks, classes)
-
-        if normalize:
-            cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        else:
-            print('Confusion matrix, without normalization')
-
-        print(cm)
-
-        thresh = cm.max() / 2.
-        for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-            plt.text(j, i, cm[i, j],
-                        horizontalalignment='center',
-                        color='white' if cm[i, j] > thresh else 'black')
+        print('train data shape:', x_data.shape[1:3])
+        print('test data shape:', test_xdata.shape[1:3])
         
+
+        model = model_v[index]
+        print('model name:', name)
+
+        earlystopping = EarlyStopping(monitor='val_loss', patience=20, min_delta=0.0001, mode='min', restore_best_weights=True)
+        model.compile(optimizer='adam', loss='binary_crossentropy',
+                    metrics=['accuracy', AUC(), Precision(), Recall()])
         
-        plt.ylabel('True label')
-        plt.xlabel('predicted label')
+
+        history = model.fit(
+            x_data,
+            y_data,
+            validation_split=0.135,
+            epochs=100,
+            batch_size=32,
+            callbacks=[
+                ModelCheckpoint(filepath=f'C:/Users/dimli/Desktop/Kwix_HAR/new_model/v6.3/{name}_{_actions[idx]}_model.h5',
+                                monitor='val_accuracy', verbose=1, save_best_only=True, mode='auto'),
+                ReduceLROnPlateau(monitor='val_accuracy', factor=0.2,
+                                patience=10, verbose=1, mode='auto')
+            ]
+        )
+        
+        model_path = f'C:/Users/dimli/Desktop/Kwix_HAR/new_model/v6.3/{name}_{_actions[idx]}_model.h5'
+        model = load_model(model_path)
+
+        test_result = model.predict(test_xdata)
+        test_result = np.argmax(test_result, axis=1)
+        test_y= np.argmax(test_ydata, axis=1)
+        from sklearn.metrics import accuracy_score, precision_score, recall_score
+
+        acc = accuracy_score(test_y, test_result)
+        precision = precision_score(test_y, test_result)
+        recall = recall_score(test_y, test_result)
+        print(f'Accuracy: {acc}, Precision: {precision}, Recall: {recall}')
+
+        # test_results = model.evaluate(
+        # test_xdata, test_ydata)
+
+        tfjs.converters.save_keras_model(model, f'C:/Users/dimli/Desktop/Kwix_HAR/js_model/v6.3/{name}_{_actions[idx]}_model_tfjs')
+
+
+        plt.figure()
+        pd.Series(history.history['loss']).plot()
+        pd.Series(history.history['val_loss']).plot()
+
+        plt.xlabel("Epoch")
+        plt.ylabel("Train Loss")
         plt.tight_layout()
-        plt.savefig(f'C:/Users/UCL7/VS_kwix/new_model/v3/confusion_matrix_{actions[idx]}_v3.2.png')
+        plt.legend(['train_loss', 'val_loss'])
+        plt.savefig(f"C:/Users/dimli/Desktop/Kwix_HAR/evaluation_v6.3/loss/{name}_{_actions[idx]}_loss_.png")
 
-    prediction = model.predict(test_xdata)
-    rounded_labels= np.argmax(test_ydata, axis=1)
-    rounded_predictions = np.argmax(prediction, axis=1)
 
-    cm = confusion_matrix(y_true=rounded_labels, y_pred=rounded_predictions)
-    cm_plot_labels = ['bad', 'good']
-    plt.figure(figure_num)
-    figure_num += 1
-    plot_confusion_matrix(cm=cm, classes=cm_plot_labels, title='Confusion matrix')
+        plt.figure()
+        pd.Series(history.history['accuracy']).plot()
+        pd.Series(history.history['val_accuracy']).plot()
+        plt.xlabel("Epoch")
+        plt.ylabel("Train Accuracy")
+        plt.tight_layout()
+        plt.legend(['train_acc', 'val_acc'])
+        plt.savefig(f"C:/Users/dimli/Desktop/Kwix_HAR/evaluation_v6.3/loss/{name}_{_actions[idx]}_acc_.png")
 
-# --------------------------------------------------------------
-    # y_val_loss = history.history['val_loss']
-    # y_loss = history.history['loss']
-    # x_len = np.arange(len(y_loss))
-    # y_test_loss = np.full(x_len.shape, test_results[0])
-    # y_test_acc = np.full(x_len.shape, test_results[1])
-    # y_test_auc = np.full(x_len.shape, test_results[2])
-    # y_test_precision = np.full(x_len.shape, test_results[3])
-    # y_test_recall = np.full(x_len.shape, test_results[4])
+        # plt.figure()
+        # pd.Series(history.history['recall']).plot(logy=True)
+        # pd.Series(history.history['val_recall']).plot(logy=True)
+        # plt.xlabel("Epoch")
+        # plt.ylabel("Recall")
+        # plt.tight_layout()
+        # plt.legend(['train', 'validation'])
+        # plt.savefig(f"C:/Users/UCL7/VS_kwix/new_model/v3/{loss}_{created_time}_{_actions[idx]}_train_recall.png")
 
-    # plt.figure(figsize = (9, 8))
-    # plot_graph(x_len, y_loss, 'Loss', 1)
-    # plot_graph(x_len, y_val_loss, 'Val_loss', 2)
 
-    # plt.figure(figsize = (9, 8))
-    # plot_graph(x_len, y_test_acc, 'ACC', 1)
-    # plot_graph(x_len, y_test_auc, 'AUC', 2)
-    # plot_graph(x_len, y_test_precision, 'PRECISION', 3)
-    # plot_graph(x_len, y_test_recall, 'RECALL', 4)
-    # plt.show()
+        # plt.figure()
+        # pd.Series(history.history['precision']).plot(logy=True)
+        # pd.Series(history.history['val_precision']).plot(logy=True)
+        # plt.xlabel("Epoch")
+        # plt.ylabel("Precision")
+        # plt.tight_layout()
+        # plt.legend(['train', 'validation'])
+        # plt.savefig(f"C:/Users/UCL7/VS_kwix/new_model/v3/{loss}_{created_time}_{_actions[idx]}_train_precisinon.png")
+
+        prediction = model.predict(test_xdata)
+        rounded_labels= np.argmax(test_ydata, axis=1)
+        rounded_predictions = np.argmax(prediction, axis=1)
+
+        cm = confusion_matrix(y_true=rounded_labels, y_pred=rounded_predictions)
+        cm_plot_labels = ['bad', 'good']
+        plot_confusion_matrix(cm=cm, classes=cm_plot_labels, title='Confusion matrix')
+        plt.savefig(f'C:/Users/dimli/Desktop/Kwix_HAR/evaluation_v6.3/confusion_matrix/{name}_{_actions[idx]}.png')
