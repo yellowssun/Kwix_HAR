@@ -1,0 +1,24 @@
+{
+    "os": "Windows-10-10.0.22000-SP0",
+    "python": "3.8.5",
+    "heartbeatAt": "2022-08-16T02:19:19.889332",
+    "startedAt": "2022-08-16T02:19:16.240739",
+    "docker": null,
+    "gpu": "NVIDIA GeForce RTX 2060",
+    "gpu_count": 1,
+    "cpu_count": 16,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "c:/Users/dimli/Desktop/Kwix_HAR/Byungsun_main/create_model_LSTM/train.py",
+    "codePath": "Byungsun_main\\create_model_LSTM\\train.py",
+    "git": {
+        "remote": "https://github.com/yellowssun/Kwix_HAR.git",
+        "commit": "7dc76122aeed9f1d9fef3811694241e7949373ca"
+    },
+    "email": "hbsun98@gmail.com",
+    "root": "C:/Users/dimli/Desktop/Kwix_HAR",
+    "host": "DESKTOP-G1JFD7A",
+    "username": "user",
+    "executable": "C:\\Users\\dimli\\anaconda3\\envs\\pythonProject\\python.exe"
+}
