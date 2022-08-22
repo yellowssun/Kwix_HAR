@@ -19,7 +19,8 @@ os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = '1'
 
 _actions = ['babel_curl', 'deadlift', 'knee_up', 'leg_raise', 'over_head_press', 'side_raise', 'side_crunch', 'side_lunge', 'squat']
 # _actions = ['side_raise', 'side_crunch', 'side_lunge']
-model_name = 'two_input_BiLS'
+model_name1 = 'two_input_BiLS'
+model_name2 = 'two_input_CNN'
 loss = 'binary_crossentropy'
 
 os.makedirs('C:/Users/dimli/Desktop/Kwix_HAR/new_model/v6.1', exist_ok=True)

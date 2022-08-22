@@ -1,6 +1,6 @@
 import keras
 from keras.models import Sequential, Model
-from keras.layers import Conv1D, Conv2D, BatchNormalization, GlobalAveragePooling1D
+from keras.layers import Conv1D, Conv2D, BatchNormalization, GlobalAveragePooling1D, GlobalAveragePooling2D
 from keras.layers import Bidirectional, LSTM, Dense
 from keras.layers import ReLU, Dropout, Input, Concatenate, Flatten
 
@@ -28,56 +28,56 @@ def two_input_BiLS():
     return model
 
 
-def two_input_CNN():
-    input_landmark = Input(shape=(15, 51), name='landmark_input')
-    input_angle = Input(shape=(15, 10), name='angle_input')
+# def two_input_CNN():
+#     input_landmark = Input(shape=(15, 51), name='landmark_input')
+#     input_angle = Input(shape=(15, 10), name='angle_input')
 
-    x = Conv2D(filters=64, kernel_size=(3, 2), stride=(3, 1), padding='valid')(input_landmark)
-    x = BatchNormalization()(x)
-    x = ReLU()(x)
-    x = Conv1D(filters=64, kernel_size=4, padding='valid')(x)
-    x = BatchNormalization()(x)
-    x = ReLU()(x)
-    x = Conv1D(filters=64, kernel_size=4, padding='valid')(x)
-    x = BatchNormalization()(x)
-    x = ReLU()(x)
+#     x = Conv2D(filters=64, kernel_size=(3, 2), stride=(3, 1), padding='valid')(input_landmark)
+#     x = BatchNormalization()(x)
+#     x = ReLU()(x)
+#     x = Conv1D(filters=64, kernel_size=4, padding='valid')(x)
+#     x = BatchNormalization()(x)
+#     x = ReLU()(x)
+#     x = Conv1D(filters=64, kernel_size=4, padding='valid')(x)
+#     x = BatchNormalization()(x)
+#     x = ReLU()(x)
 
-    y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
-    y = BatchNormalization()(y)
-    y = ReLU()(y)
-    y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
-    y = BatchNormalization()(y)
-    y = ReLU()(y)
-    y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
-    y = BatchNormalization()(y)
-    y = ReLU()(y)
+#     y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
+#     y = BatchNormalization()(y)
+#     y = ReLU()(y)
+#     y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
+#     y = BatchNormalization()(y)
+#     y = ReLU()(y)
+#     y = Conv1D(filters=64, kernel_size=4, padding='same')(y)
+#     y = BatchNormalization()(y)
+#     y = ReLU()(y)
 
-    concatenate = Concatenate()([x, y])
-    pooling = GlobalAveragePooling1D()(concatenate)
+#     concatenate = Concatenate()([x, y])
+#     pooling = GlobalAveragePooling1D()(concatenate)
 
-    z = Dense(32, activation='relu')(pooling)
-    z = Dense(16, activation='relu')(z)
-    z = Dense(2, activation='softmax')(z)
+#     z = Dense(32, activation='relu')(pooling)
+#     z = Dense(16, activation='relu')(z)
+#     z = Dense(2, activation='softmax')(z)
 
-    model = Model(inputs=[input_landmark, input_angle], outputs=z)
-    return model
+#     model = Model(inputs=[input_landmark, input_angle], outputs=z)
+#     return model
 
 
 def CNN():
     model = Sequential()
-    model.add(Conv1D(filters=64, kernel_size=4, padding='same'))
+    model.add(Conv1D(filters=128, kernel_size=3, padding='valid'))
     model.add(BatchNormalization())
     model.add(ReLU())
 
-    model.add(Conv1D(filters=32, kernel_size=4, padding='same'))
+    model.add(Conv1D(filters=64, kernel_size=3, padding='valid'))
     model.add(BatchNormalization())
     model.add(ReLU())
 
-    model.add(Conv1D(filters=16, kernel_size=4, padding='valid'))
+    model.add(Conv1D(filters=32, kernel_size=3, padding='valid'))
     model.add(BatchNormalization())
     model.add(ReLU())
 
-    model.add(Conv1D(filters=8, kernel_size=4, padding='valid'))
+    model.add(Conv1D(filters=16, kernel_size=3, padding='valid'))
     model.add(BatchNormalization())
     model.add(ReLU())
 

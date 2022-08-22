@@ -3,8 +3,9 @@ import numpy as np
 import time
 import os
 from draw_function import set_cam, custom_landmarks_13, custom_landmarks_17
-from operation import get_points_angle_17, get_points_angle_13
+from operation import get_points_angle_13, get_points_angle_17
 from sklearn.preprocessing import Normalizer, RobustScaler
+
 
 babel_curl = ['babel_curl_F', 'babel_curl_T']
 deadlift = ['deadlift_F', 'deadlift_T']
@@ -12,8 +13,8 @@ over_head_press = ['over_head_press_F', 'over_head_press_T']
 side_raise = ['side_raise_F', 'side_raise_T']
 squat = ['squat_F', 'squat_T']
 
-actions = [babel_curl, deadlift, over_head_press, squat]
-_actions = ['babel_curl', 'deadlift', 'over_head_press', 'squat']
+actions = [babel_curl, deadlift, over_head_press, side_raise, squat]
+_actions = ['babel_curl', 'deadlift', 'over_head_press', 'side_raise', 'squat']
 
 N_scaler = Normalizer()
 R_scaler = RobustScaler()
@@ -22,10 +23,10 @@ created_time = int(time.time())
 sequence_length = 15
 pose = set_cam()
 
-os.makedirs('C:/Users/UCL7/VS_kwix/test_dataset_v5', exist_ok=True)
+os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/test_dataset_v7', exist_ok=True)
 
 for i, _ in enumerate(actions):
-    os.makedirs('C:/Users/UCL7/VS_kwix/test_dataset_v5/' + _actions[i], exist_ok=True)
+    os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/test_dataset_v7/' + _actions[i], exist_ok=True)
     path_dir = 'E:/' + _actions[i]
     for idx, action in enumerate(_):
         start = time.time()
@@ -58,8 +59,9 @@ for i, _ in enumerate(actions):
                     landmark_subset = custom_landmarks_17(results)
                     joint, angle = get_points_angle_17(landmark_subset)
 
-                    reshape_angle = np.degrees(angle).reshape(-1, 1)
-                    scaled_angle = R_scaler.fit_transform(reshape_angle)
+                    reshape_angle = angle.reshape(1, -1)
+                    scaled_angle = N_scaler.fit_transform(reshape_angle)
+                    scaled_angle = scaled_angle.reshape(-1, 1)
 
                     angle_label = np.array(
                         [scaled_angle], dtype=np.float32)
@@ -71,7 +73,7 @@ for i, _ in enumerate(actions):
 
         data = np.array(data)
         print(action, data.shape)
-        np.save(os.path.join('C:/Users/UCL7/VS_kwix/test_dataset_v5/' + _actions[i],
+        np.save(os.path.join('C:/Users/UCL7/Desktop/Kwix_HAR/test_dataset_v7/' + _actions[i],
                 f'raw_{action}_{created_time}'), data)
 
         full_seq_data = []
@@ -80,6 +82,6 @@ for i, _ in enumerate(actions):
 
         full_seq_data = np.array(full_seq_data)
         print(action, full_seq_data.shape)
-        np.save(os.path.join('C:/Users/UCL7/VS_kwix/test_dataset_v5/' + _actions[i],
+        np.save(os.path.join('C:/Users/UCL7/Desktop/Kwix_HAR/test_dataset_v7/' + _actions[i],
                 f'seq_{action}_{created_time}'), full_seq_data)
         print("Working time : ", time.time() - start)

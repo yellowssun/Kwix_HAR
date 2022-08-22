@@ -4,7 +4,7 @@ import time
 import os
 from draw_function import set_cam, custom_landmarks_13, custom_landmarks_17
 from operation import get_points_angle_13, get_points_angle_17
-from sklearn.preprocessing import Normalizer, StandardScaler, RobustScaler
+from sklearn.preprocessing import Normalizer
 
 
 leg_raise = ['leg_raise_F', 'leg_raise_T']
@@ -19,15 +19,12 @@ pose_angles = ['C']
 created_time = int(time.time())
 sequence_length = 15
 N_scaler = Normalizer()
-S_scaler = StandardScaler()
-R_scaler = RobustScaler()
-
 pose = set_cam()
 
-os.makedirs('C:/Users/UCL7/VS_kwix/train_dataset_v5/', exist_ok=True)
+os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/train_dataset_v7/', exist_ok=True)
 
 for i, _ in enumerate(actions):
-    os.makedirs('C:/Users/UCL7/VS_kwix/train_dataset_v5/' + _actions[i], exist_ok=True)
+    os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/train_dataset_v7/' + _actions[i], exist_ok=True)
     path_dir = 'E:/' + _actions[i]
     for idx, action in enumerate(_):
         start = time.time()
@@ -53,10 +50,14 @@ for i, _ in enumerate(actions):
                 if results.pose_landmarks is not None:
                     landmark_subset = custom_landmarks_17(results)
                     joint, angle = get_points_angle_17(landmark_subset)
-
-                    reshape_angle = np.degrees(angle).reshape(-1, 1)
-                    scaled_angle = R_scaler.fit_transform(reshape_angle)
-
+                    
+                    # reshape_angle = angle.reshape(-1, 1)
+                    # scaled_angle = reshape_angle/180
+                    reshape_angle = angle.reshape(1, -1)
+                    scaled_angle = N_scaler.fit_transform(reshape_angle)
+                    scaled_angle = scaled_angle.reshape(-1, 1)
+                    
+                    print(joint.shape, scaled_angle.shape)
 
                     angle_label = np.array([scaled_angle], dtype=np.float32)
                     if idx == 0:
@@ -71,7 +72,7 @@ for i, _ in enumerate(actions):
 
         data = np.array(data)
         print(action, data.shape)
-        np.save(os.path.join('C:/Users/UCL7/VS_kwix/train_dataset_v5/' + _actions[i],
+        np.save(os.path.join('C:/Users/UCL7/Desktop/Kwix_HAR/train_dataset_v7/' + _actions[i],
                 f'raw_{action}_{created_time}'), data)
 
         full_seq_data = []
@@ -80,6 +81,6 @@ for i, _ in enumerate(actions):
 
         full_seq_data = np.array(full_seq_data)
         print(action, full_seq_data.shape)
-        np.save(os.path.join('C:/Users/UCL7/VS_kwix/train_dataset_v5/' + _actions[i],
+        np.save(os.path.join('C:/Users/UCL7/Desktop/Kwix_HAR/train_dataset_v7/' + _actions[i],
                 f'seq_{action}_{created_time}'), full_seq_data)
         print("Working time : ", time.time() - start)
