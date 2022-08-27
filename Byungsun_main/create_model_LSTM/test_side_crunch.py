@@ -12,7 +12,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 actions = ['standing_side_crunch', 'other']
 
 seq_length = 15
-model = load_model(
+model_1 = load_model(
+    'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v7/RNN_side_crunch_model.h5')
+model_2 = load_model(
+    'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v7/LS_side_crunch_model.h5')
+model_3 = load_model(
     'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v7/CNN_side_crunch_model.h5')
 pose = set_cam()
 
@@ -24,9 +28,10 @@ i = 0
 total_time = 0
 count = 0
 state = 0
+start_time = 0
+end_time = 0
 
 while True:
-    start_time = time.time()
     ret, img = cap.read()
 
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -48,13 +53,14 @@ while True:
         if len(seq) < seq_length:
             continue
 
-        action, y_pred = input_data(seq, seq_length, model, actions)
+        start_time = time.time()
+        action, y_pred = input_data(seq, seq_length, model_3, actions)
+        end_time = time.time()
+
         action_seq.append(action)
 
         if len(action_seq) < 3:
             continue
-
-        end_time = time.time()
 
         if action_seq[-1] == action_seq[-2]:
             if y_pred[1] > 0.8:

@@ -1,7 +1,7 @@
 import keras
 from keras.models import Sequential, Model
 from keras.layers import Conv1D, Conv2D, BatchNormalization, GlobalAveragePooling1D, GlobalAveragePooling2D
-from keras.layers import Bidirectional, LSTM, Dense
+from keras.layers import Bidirectional, LSTM, Dense, SimpleRNN
 from keras.layers import ReLU, Dropout, Input, Concatenate, Flatten
 
 def two_input_BiLS():
@@ -65,19 +65,19 @@ def two_input_BiLS():
 
 def CNN():
     model = Sequential()
-    model.add(Conv1D(filters=128, kernel_size=3, padding='valid'))
+    model.add(Conv1D(filters=128, kernel_size=1, padding='valid'))
     model.add(BatchNormalization())
     model.add(ReLU())
 
-    model.add(Conv1D(filters=64, kernel_size=3, padding='valid'))
+    model.add(Conv1D(filters=64, kernel_size=1, padding='valid'))
     model.add(BatchNormalization())
     model.add(ReLU())
 
-    model.add(Conv1D(filters=32, kernel_size=3, padding='valid'))
+    model.add(Conv1D(filters=32, kernel_size=1, padding='valid'))
     model.add(BatchNormalization())
     model.add(ReLU())
 
-    model.add(Conv1D(filters=16, kernel_size=3, padding='valid'))
+    model.add(Conv1D(filters=16, kernel_size=1, padding='valid'))
     model.add(BatchNormalization())
     model.add(ReLU())
 
@@ -89,6 +89,22 @@ def CNN():
 
     return model
 
+
+def RNN():
+    model = Sequential()
+    model.add(SimpleRNN(32, return_sequences=True, input_shape=(15, 61), dropout=0.3))
+    model.add(SimpleRNN(64, return_sequences=True, dropout=0.3))
+    model.add(SimpleRNN(64, return_sequences=True, dropout=0.3))
+    model.add(SimpleRNN(32))
+
+    model.add(Dense(32, activation='relu'))
+    model.add(Dense(16, activation='relu'))
+    model.add(Dense(8, activation='relu'))
+    model.add(Dense(2, activation='softmax'))
+
+    model.build(input_shape=(None, 15, 61))
+    # plot_model(model, to_file='BiLS_model.png', show_shapes=True)
+    return model
 
 def BiLS():
     model = Sequential()
@@ -109,8 +125,8 @@ def BiLS():
 
 def LS():
     model = Sequential()
-    model.add(LSTM(64, return_sequences=True, input_shape=(15, 61), dropout=0.3))
-    model.add(LSTM(128, return_sequences=True, dropout=0.3))
+    model.add(LSTM(32, return_sequences=True, input_shape=(15, 61), dropout=0.3))
+    model.add(LSTM(64, return_sequences=True, dropout=0.3))
     model.add(LSTM(64, return_sequences=True, dropout=0.3))
     model.add(LSTM(32))
 

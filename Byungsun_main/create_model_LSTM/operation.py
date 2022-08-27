@@ -71,7 +71,7 @@ def input_data(seq, seq_length, model, actions):
     return action, y_pred
 
 
-def load_data(path_dir, folder_list):
+def load_data_1(path_dir, folder_list):
     data = np.concatenate([
         np.load(path_dir + '/' + folder_list[2]),
         np.load(path_dir + '/' + folder_list[3]),
@@ -80,10 +80,18 @@ def load_data(path_dir, folder_list):
     return data
 
 
-def load_test_data(path_dir, folder_list):
+def load_data_2(path_dir, folder_list):
     data = np.concatenate([
         np.load(path_dir + '/' + folder_list[2]),
-        np.load(path_dir + '/' + folder_list[3])
+        np.load(path_dir + '/' + folder_list[3]),
+        np.load(path_dir + '/' + folder_list[4]),
+        np.load(path_dir + '/' + folder_list[5]),
+        np.load(path_dir + '/' + folder_list[6]),
+        np.load(path_dir + '/' + folder_list[7]),
+        np.load(path_dir + '/' + folder_list[8]),
+        np.load(path_dir + '/' + folder_list[9]),
+        np.load(path_dir + '/' + folder_list[10]),
+        np.load(path_dir + '/' + folder_list[11])
     ], axis=0)
     return data
 

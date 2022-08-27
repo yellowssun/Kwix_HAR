@@ -33,7 +33,7 @@ for i, _ in enumerate(actions):
         path1 = path_dir + '/' + _[idx]     # E:/babel_curl/babel_curl_T
         print('action:', action)
 
-        for p in range(1, 7):
+        for p in range(1, 9):
             path2 = path1 + '/' + str(p)          # E:/babel_curl/babel_curl_T/1
             print('person:', p)
             print(path2)

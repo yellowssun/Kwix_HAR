@@ -32,7 +32,7 @@ for i, _ in enumerate(actions):
         path1 = path_dir + '/' + _[idx]     # D:/fitness_image_data/Training/lying_leg_raise
         print('action:', action)
 
-        for p in range(1, 7):
+        for p in range(1, 9):
             path2 = path1 + '/' + str(p)          # D:/fitness_image_data/Training/lying_leg_raise/1
             print('person:', p)
             print(path2)
