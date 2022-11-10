@@ -52,7 +52,7 @@ for index, name in enumerate(model_name):
         print('model name:', name)
 
         earlystopping = EarlyStopping(monitor='val_loss', patience=10, min_delta=0.0001, mode='min', restore_best_weights=True)
-        model.compile(optimizer='adam', loss='binary_crossentropy',
+        model.compile(optimizer='adam', loss='categorical_crossentropy',
                     metrics=['accuracy', AUC(), Precision(), Recall()])
 
 
@@ -62,7 +62,7 @@ for index, name in enumerate(model_name):
             validation_split=0.2,
             epochs=100,
             batch_size=32,
-            callbacks=[
+            callbacks=[earlystopping, 
                 ModelCheckpoint(filepath=f'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v9/{name}_{_actions[idx]}_model.h5',
                                 monitor='val_accuracy', verbose=1, save_best_only=True, mode='auto'),
                 ReduceLROnPlateau(monitor='val_accuracy', factor=0.2,
@@ -76,12 +76,11 @@ for index, name in enumerate(model_name):
         test_result = model.predict(test_xdata)
         test_result = np.argmax(test_result, axis=1)
         test_y= np.argmax(test_ydata, axis=1)
-        # from sklearn.metrics import accuracy_score, precision_score, recall_score
+        from sklearn.metrics import precision_score, recall_score
 
-        # acc = accuracy_score(test_y, test_result, average='macro')
-        # precision = precision_score(test_y, test_result, average='macro')
-        # recall = recall_score(test_y, test_result, average='macro')
-        # print(f'Accuracy: {acc}, Precision: {precision}, Recall: {recall}')
+        precision = precision_score(test_y, test_result, average='macro')
+        recall = recall_score(test_y, test_result, average='macro')
+        print(f'Precision: {precision}, Recall: {recall}')
 
         tfjs.converters.save_keras_model(model, f'C:/Users/UCL7/Desktop/Kwix_HAR/js_model/v9/{name}_{_actions[idx]}_model_tfjs')
 

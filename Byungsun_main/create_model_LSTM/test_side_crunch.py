@@ -13,11 +13,11 @@ actions = ['bad', 'good', 'other']
 
 seq_length = 15
 model_1 = load_model(
-    'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v9/RNN_side_crunch_model.h5')
+    'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v7/RNN_side_crunch_model.h5')
 model_2 = load_model(
-    'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v9/LS_side_crunch_model.h5')
+    'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v7/LS_side_crunch_model.h5')
 model_3 = load_model(
-    'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v9/CNN_side_crunch_model.h5')
+    'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v7/CNN_side_crunch_model.h5')
 pose = set_cam()
 
 N_scaler = Normalizer()
@@ -107,8 +107,6 @@ while True:
 
     cv2.imshow('img', img)
     if cv2.waitKey(1) == ord('q'):
-        break
-    if i == 800:
         break
 
 print(f'tatal time: {total_time}')

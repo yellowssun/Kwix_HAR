@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import tensorflowjs as tfjs
 from keras.models import load_model
 from sklearn.metrics import confusion_matrix
-from keras.metrics import AUC, Precision, Recall
+from keras.metrics import Precision, Recall
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
-from operation import load_data_1, seperate_label, plot_confusion_matrix, seperate_angle
-from custom_model import CNN, BiLS, BiLS_CNN, CNN_BiLS, LS, RNN
+from operation import load_data_1, seperate_label, plot_confusion_matrix
+from custom_model_99 import LS, CNN, CNN_LS, LS_CNN, BiLS
 from sklearn.model_selection import train_test_split
 # import wandb
 
@@ -21,72 +21,75 @@ _actions = ['side_raise', 'side_crunch', 'side_lunge', 'babel_curl', 'deadlift',
 loss = 'binary_crossentropy'
 
 model_name1 = 'CNN'
-# model_name2 = 'RNN'
-# model_name3 = 'LS'
-model_name = [model_name1]
+model_name2 = 'LS'
+model_name3 = 'CNN_LS'
+model_name4 = 'LS_CNN'
+model_name5 = 'BiLS'
+model_name = [model_name1, model_name2, model_name3, model_name4, model_name5]
 
 model1 = CNN()
-# model2 = RNN()
-# model3 = LS()
-model_v = [model1]
+model2 = LS()
+model3 = CNN_LS()
+model4 = LS_CNN()
+model5 = BiLS()
+model_v = [model1, model2, model3, model4, model5]
 
-os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v9', exist_ok=True)
-os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v9', exist_ok=True)
-os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v9/confusion_matrix', exist_ok=True)
-os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v9/loss', exist_ok=True)
-os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/js_model/v9', exist_ok=True)
+os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v11', exist_ok=True)
+os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v11', exist_ok=True)
+os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v11/confusion_matrix', exist_ok=True)
+os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v11/loss', exist_ok=True)
+os.makedirs('C:/Users/UCL7/Desktop/Kwix_HAR/js_model/v11', exist_ok=True)
 for index, name in enumerate(model_name):
     model_v[index].summary()
     for idx, _ in enumerate(_actions):
         print('action:', _actions[idx])
-        path_dir1 = 'C:/Users/UCL7/Desktop/Kwix_HAR/train_dataset_v7/' + _actions[idx]
+        path_dir1 = 'C:/Users/UCL7/Desktop/Kwix_HAR/train_dataset_v9/' + _actions[idx]
         folder_list1 = os.listdir(path_dir1)
         data = load_data_1(path_dir1, folder_list1)
 
         train_data, test_data = train_test_split(data, test_size=0.1, train_size=0.9, random_state=2022)
         x_data, y_data = seperate_label(train_data)
         test_xdata, test_ydata = seperate_label(test_data)
-
+        print(x_data.shape)
 
         model = model_v[index]
         print('model name:', name)
 
-        earlystopping = EarlyStopping(monitor='val_loss', patience=10, min_delta=0.0001, mode='min', restore_best_weights=True)
+        earlystopping = EarlyStopping(monitor='val_loss', patience=15, min_delta=0.0001, mode='min', restore_best_weights=True)
         model.compile(optimizer='adam', loss='binary_crossentropy',
-                    metrics=['accuracy', AUC(), Precision(), Recall()])
+                    metrics=['accuracy', Precision(), Recall()])
 
 
         history = model.fit(
             x_data,
             y_data,
             validation_split=0.2,
-            epochs=100,
+            epochs=50,
             batch_size=32,
-            callbacks=[
-                ModelCheckpoint(filepath=f'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v9/{name}_{_actions[idx]}_model.h5',
+            callbacks=[earlystopping,
+                ModelCheckpoint(filepath=f'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v11/{name}_{_actions[idx]}_model.h5',
                                 monitor='val_accuracy', verbose=1, save_best_only=True, mode='auto'),
                 ReduceLROnPlateau(monitor='val_accuracy', factor=0.2,
                                 patience=10, verbose=1, mode='auto')
             ]
         )
         
-        model_path = f'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v9/{name}_{_actions[idx]}_model.h5'
+        model_path = f'C:/Users/UCL7/Desktop/Kwix_HAR/new_model/v11/{name}_{_actions[idx]}_model.h5'
         model = load_model(model_path)
 
         test_result = model.predict(test_xdata)
         test_result = np.argmax(test_result, axis=1)
         test_y= np.argmax(test_ydata, axis=1)
-        from sklearn.metrics import accuracy_score, precision_score, recall_score
+        from sklearn.metrics import accuracy_score, f1_score
 
         acc = accuracy_score(test_y, test_result)
-        precision = precision_score(test_y, test_result)
-        recall = recall_score(test_y, test_result)
-        print(f'Accuracy: {acc}, Precision: {precision}, Recall: {recall}')
+        f1_s = f1_score(test_y, test_result)
+        print(f'Accuracy: {acc}, F1-score: {f1_s}')
 
         # test_results = model.evaluate(
         # test_xdata, test_ydata)
 
-        tfjs.converters.save_keras_model(model, f'C:/Users/UCL7/Desktop/Kwix_HAR/js_model/v9/{name}_{_actions[idx]}_model_tfjs')
+        tfjs.converters.save_keras_model(model, f'C:/Users/UCL7/Desktop/Kwix_HAR/js_model/v11/{name}_{_actions[idx]}_model_tfjs')
 
 
         plt.figure()
@@ -97,7 +100,7 @@ for index, name in enumerate(model_name):
         plt.ylabel("Train Loss")
         plt.tight_layout()
         plt.legend(['train_loss', 'val_loss'])
-        plt.savefig(f"C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v9/loss/{name}_{_actions[idx]}_loss_.png")
+        plt.savefig(f"C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v11/loss/{name}_{_actions[idx]}_loss_.png")
 
 
         plt.figure()
@@ -107,7 +110,7 @@ for index, name in enumerate(model_name):
         plt.ylabel("Train Accuracy")
         plt.tight_layout()
         plt.legend(['train_acc', 'val_acc'])
-        plt.savefig(f"C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v9/loss/{name}_{_actions[idx]}_acc_.png")
+        plt.savefig(f"C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v11/loss/{name}_{_actions[idx]}_acc_.png")
 
         # plt.figure()
         # pd.Series(history.history['recall']).plot(logy=True)
@@ -136,4 +139,4 @@ for index, name in enumerate(model_name):
         cm = confusion_matrix(y_true=rounded_labels, y_pred=rounded_predictions)
         cm_plot_labels = ['bad', 'good']
         plot_confusion_matrix(cm=cm, classes=cm_plot_labels, title='Confusion matrix')
-        plt.savefig(f'C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v9/confusion_matrix/{name}_{_actions[idx]}.png')
+        plt.savefig(f'C:/Users/UCL7/Desktop/Kwix_HAR/evaluation_v11/confusion_matrix/{name}_{_actions[idx]}.png')
