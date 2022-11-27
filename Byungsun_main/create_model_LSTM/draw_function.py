@@ -8,19 +8,6 @@ mp_drawing = mp.solutions.drawing_utils
     """
 
 
-# 발끝 점과 뒤꿈치 점 삭제한 landmarks
-def custom_landmarks_13(results):
-    """
-    13개의 Landmarks
-    """
-    landmark_subset = landmark_pb2.NormalizedLandmarkList(
-        landmark=[results.pose_landmarks.landmark[0]] +
-        results.pose_landmarks.landmark[11: 17] +
-        results.pose_landmarks.landmark[23:29]
-    )
-    return landmark_subset
-
-
 def custom_landmarks_17(results):
     """
     17개의 Landmarks

@@ -1,28 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
-import time
 from keras.utils import to_categorical
-
-
-def get_points_angle_13(landmark_subset):
-    """
-    13개의 Landmarks, 8개의 각도
-    """
-    joint = np.zeros((13, 3))
-    for j, lm in enumerate(landmark_subset.landmark):
-        joint[j] = [lm.x, lm.y, lm.z]
-
-    v1 = joint[[4, 2, 2, 8, 10, 3, 1, 1, 7, 9], :3]
-    v2 = joint[[6, 4, 8, 10, 12, 5, 3, 7, 9, 11], :3]
-    v = v2 - v1
-    v = v / np.linalg.norm(v, axis=1)[:, np.newaxis]
-
-    angle = np.arccos(np.einsum('nt, nt->n',
-                                v[[0, 1, 2, 3, 5, 6, 7, 8], :],
-                                v[[1, 2, 3, 4, 6, 7, 8, 9], :]))
-    angle = np.degrees(angle)
-    return joint, angle
+from sklearn.model_selection import StratifiedKFold
 
 
 def get_points_angle_17(landmark_subset):
@@ -72,6 +52,11 @@ def input_data(seq, seq_length, model, actions):
     return action, y_pred
 
 
+def reshape_input(input):
+    input = np.expand_dims(input, axis=2)
+    return input
+
+
 def load_data_1(path_dir, folder_list):
     data = np.concatenate([
         np.load(path_dir + '/' + folder_list[2]),
@@ -84,18 +69,32 @@ def load_data_1(path_dir, folder_list):
 def load_data_2(path_dir, folder_list):
     data = np.concatenate([
         np.load(path_dir + '/' + folder_list[2]),
-        np.load(path_dir + '/' + folder_list[3]),
-        np.load(path_dir + '/' + folder_list[4]),
-        np.load(path_dir + '/' + folder_list[5]),
-        np.load(path_dir + '/' + folder_list[6]),
-        np.load(path_dir + '/' + folder_list[7]),
-        np.load(path_dir + '/' + folder_list[8]),
-        np.load(path_dir + '/' + folder_list[9]),
-        np.load(path_dir + '/' + folder_list[10]),
-        np.load(path_dir + '/' + folder_list[11])
+        np.load(path_dir + '/' + folder_list[3])
     ], axis=0)
     return data
 
+
+# def k_fold_validation(model, x_data, y_data):
+#     score_list = []
+#     k = 5
+#     skf = StratifiedKFold(n_splits=k)
+#     n_iter = 0
+#     for train_idx, test_idx in skf.split(x_data, y_data):
+#         n_iter += 1
+#         print(f'================================{n_iter}번째 K-Fold================================')
+#         print(f'train_idx_len: {len(train_idx)} / test_idx_len: {len(test_idx)}')
+
+#         model.fit(x_train, y_train)
+#         model.fit(X_train, y_train)
+#         preds = model.predict(X_test)
+#         score = accuracy_score(y_test, preds)
+#         print(f'{n_iter}번째 단일 accuracy_score:{score}')
+#         score_list.append(score)  
+
+
+#     print('======================================================')
+#     print(f'최종 평균 accuracy_socre : {sum(score_list)/len(score_list)}')
+#     return 
 
 def plot_graph(x, y, eval, num):
     plt.subplot(2, 2, num)
