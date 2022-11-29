@@ -5,7 +5,7 @@ from keras.layers import Bidirectional, LSTM, Dense, SimpleRNN, ConvLSTM1D
 from keras.layers import ReLU, Flatten
 
 
-def RNN():
+def RNN_61():
     model = Sequential()
     model.add(SimpleRNN(32, return_sequences=True, input_shape=(15, 61), dropout=0.3))
     model.add(SimpleRNN(64, return_sequences=True, dropout=0.3))
@@ -22,10 +22,9 @@ def RNN():
     return model
 
 
-def LS():
+def LS_61():
     model = Sequential()
     model.add(LSTM(64, return_sequences=True, input_shape=(15, 61), dropout=0.3))
-    model.add(LSTM(64, return_sequences=True, dropout=0.3))
     model.add(LSTM(64, return_sequences=True, dropout=0.3))
     model.add(LSTM(64, return_sequences=True, dropout=0.3))
     model.add(Flatten())
@@ -39,7 +38,7 @@ def LS():
     return model
 
 
-def BiLS():
+def BiLS_61():
     model = Sequential()
     model.add(Bidirectional(LSTM(64, return_sequences=True, input_shape=(15, 61), dropout=0.3)))
     model.add(Bidirectional(LSTM(64, return_sequences=True, dropout=0.3)))
@@ -76,7 +75,7 @@ def ConvLSTM():
     return model
     
 
-def CNN():
+def CNN_61():
     model = Sequential()
     model.add(Conv1D(filters=128, kernel_size=2, padding='same'))
     model.add(BatchNormalization())
@@ -143,26 +142,6 @@ def CNN_LS():
     # model.build(input_shape=(None, 15, 61))
     # return model
 
-# def LS_CNN():
-#     model = Sequential()
-#     model.add(LSTM(128, return_sequences=True, input_shape=(15, 61), dropout=0.3))
-#     model.add(LSTM(64, return_sequences=True, dropout=0.3))
-    
-#     model.add(Conv1D(filters=64, kernel_size=1, padding='valid'))
-#     model.add(Dropout(rate=0.5))
-#     model.add(BatchNormalization())
-#     model.add(ReLU())
-
-#     model.add(Conv1D(filters=32, kernel_size=1, padding='valid'))
-#     model.add(Dropout(rate=0.5))
-#     model.add(BatchNormalization())
-#     model.add(ReLU())
-
-#     model.add(GlobalAveragePooling1D())
-#     model.add(Dense(2, activation='softmax'))
-    
-#     model.build(input_shape=(15, 61))
-#     return model
 
 # def two_input_BiLS():
 #     input_landmark = Input(shape=(15, 51), name='landmark_input')

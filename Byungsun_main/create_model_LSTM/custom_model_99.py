@@ -5,7 +5,7 @@ from keras.layers import Bidirectional, LSTM, Dense
 from keras.layers import ReLU, Flatten
 
 
-def CNN():
+def CNN_99():
     model = Sequential()
     model.add(Conv1D(filters=128, kernel_size=2, padding='same'))
     model.add(BatchNormalization())
@@ -28,10 +28,9 @@ def CNN():
     return model
 
 
-def LS():
+def LS_99():
     model = Sequential()
     model.add(LSTM(64, return_sequences=True, input_shape=(15, 99), dropout=0.3))
-    model.add(LSTM(64, return_sequences=True, dropout=0.3))
     model.add(LSTM(64, return_sequences=True, dropout=0.3))
     model.add(LSTM(64, return_sequences=True, dropout=0.3))
     model.add(Flatten())
@@ -44,7 +43,7 @@ def LS():
     return model
 
 
-def BiLS():
+def BiLS_99():
     model = Sequential()
     model.add(Bidirectional(LSTM(64, return_sequences=True, input_shape=(15, 99), dropout=0.3)))
     model.add(Bidirectional(LSTM(64, return_sequences=True, dropout=0.3)))
